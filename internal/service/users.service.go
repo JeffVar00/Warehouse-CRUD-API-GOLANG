@@ -10,6 +10,8 @@ import (
 var (
 	ErrUserAlreadyExists  = errors.New("user already exists") // no poner en mayuscula ni con punto
 	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrRoleAlreadyExists  = errors.New("role already exists")
+	ErrRoleDoesntExist    = errors.New("role doesnt exist")
 )
 
 func (s *serv) RegisterUser(ctx context.Context, email, name, password string) error {
@@ -41,8 +43,6 @@ func (s *serv) LoginUser(ctx context.Context, email, password string) (*models.U
 		return nil, err
 	}
 
-	//TODO DECRYPT PASSWORD
-
 	bb, err := encryption.FromBase64(u.Password)
 	if err != nil {
 		return nil, err
@@ -64,4 +64,48 @@ func (s *serv) LoginUser(ctx context.Context, email, password string) (*models.U
 		Email: u.Email,
 		Name:  u.Name,
 	}, nil
+}
+
+func (s *serv) SaveUserRole(ctx context.Context, userID, roleID int64) error {
+
+	roles, err := s.repo.GetUserRoles(ctx, userID)
+
+	if err != nil {
+		return err
+	}
+
+	for _, r := range roles {
+		if r.RoleID == roleID {
+			//retornar nill y hacer como que nada paso
+			//return nil
+			//o un mensaje de error
+			return ErrRoleAlreadyExists
+		}
+	}
+
+	return s.repo.SaveUserRole(ctx, userID, roleID)
+}
+
+func (s *serv) RemoveUserRole(ctx context.Context, userID, roleID int64) error {
+
+	roles, err := s.repo.GetUserRoles(ctx, userID)
+
+	if err != nil {
+		return err
+	}
+
+	role_found_flag := false
+
+	for _, r := range roles {
+		if r.RoleID == roleID {
+			role_found_flag = true
+			break
+		}
+	}
+
+	if !role_found_flag {
+		return ErrRoleDoesntExist
+	}
+
+	return s.repo.RemoveUserRole(ctx, userID, roleID)
 }

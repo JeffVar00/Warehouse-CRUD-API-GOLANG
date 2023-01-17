@@ -23,20 +23,21 @@ func main() {
 			service.New,
 		),
 		fx.Invoke(
-			//pueden exitir falsos positivos, ahora a probarlo con la bd
-			func(ctx context.Context, serv service.Service) {
-				err := serv.RegisterUser(ctx, "my@email.com", "my name", "my password")
-				if err != nil {
-					panic(err)
-				}
-				u, err := serv.LoginUser(ctx, "my@email.com", "my password")
-				if err != nil {
-					panic(err)
-				}
-				if u.Name != "my name" {
-					panic("wrong name")
-				}
-			}),
+		//TESTS PARA VER SI FUNCIONA
+		//pueden exitir falsos positivos, ahora a probarlo con la bd
+		// func(ctx context.Context, serv service.Service) {
+		// 	err := serv.RegisterUser(ctx, "my@email.com", "my name", "my password")
+		// 	if err != nil {
+		// 		panic(err)
+		// 	}
+		// 	u, err := serv.LoginUser(ctx, "my@email.com", "my password")
+		// 	if err != nil {
+		// 		panic(err)
+		// 	}
+		// 	if u.Name != "my name" {
+		// 		panic("wrong name")
+		// 	}}
+		),
 	)
 	app.Run()
 }

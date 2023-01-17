@@ -51,6 +51,34 @@ func (_m *MockService) RegisterUser(ctx context.Context, email string, name stri
 	return r0
 }
 
+// RemoveUserRole provides a mock function with given fields: ctx, userID, roleID
+func (_m *MockService) RemoveUserRole(ctx context.Context, userID int64, roleID int64) error {
+	ret := _m.Called(ctx, userID, roleID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64) error); ok {
+		r0 = rf(ctx, userID, roleID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SaveUserRole provides a mock function with given fields: ctx, userID, roleID
+func (_m *MockService) SaveUserRole(ctx context.Context, userID int64, roleID int64) error {
+	ret := _m.Called(ctx, userID, roleID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, int64) error); ok {
+		r0 = rf(ctx, userID, roleID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewMockService interface {
 	mock.TestingT
 	Cleanup(func())

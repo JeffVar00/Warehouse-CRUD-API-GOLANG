@@ -32,6 +32,12 @@ func TestMain(m *testing.M) {
 	repo.On("GetUserByEmail", mock.Anything, "test@exists.com").Return(u, nil)
 	//ahora con el primer caso de error al guardar un usuario y siempre e snull y recibe lo que sea
 	repo.On("SaveUser", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	//si no definimos el tipo de dato que recibe lo va a tomar como tipo interface, por lo que no va a agarrar el dato, ya que espera un tipo int64 ya que es lo que necesita la funcion
+	repo.On("GetUserRoles", mock.Anything, int64(1)).Return([]entity.UserRole{{UserID: 1, RoleID: 1}}, nil)
+	//
+	repo.On("RemoveUserRole", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	repo.On("SaveUserRole", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	s = New(repo)
 
@@ -133,4 +139,80 @@ func TestLoginUser(t *testing.T) {
 		})
 	}
 
+}
+
+func TestSaveUserRole(t *testing.T) {
+	testCases := []struct {
+		Name          string
+		UserID        int64
+		RoleID        int64
+		ExpectedError error
+	}{
+		{
+			Name:          "Save_User_Role_Success",
+			UserID:        1,
+			RoleID:        2,
+			ExpectedError: nil,
+		},
+		{
+			Name:          "Save_User_Role_UserAlreadyHasRole",
+			UserID:        1,
+			RoleID:        1,
+			ExpectedError: ErrRoleAlreadyExists,
+		},
+	}
+
+	ctx := context.Background()
+
+	for i := range testCases {
+		tc := testCases[i]
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Parallel() //ejecutar los subtest en pararelo
+			repo.Mock.Test(t)
+
+			err := s.SaveUserRole(ctx, tc.UserID, tc.RoleID)
+
+			if err != tc.ExpectedError {
+				t.Errorf("expected error %v, got %v", tc.ExpectedError, err)
+			}
+		})
+	}
+}
+
+func TestRemoveUserRole(t *testing.T) {
+	testCases := []struct {
+		Name          string
+		UserID        int64
+		RoleID        int64
+		ExpectedError error
+	}{
+		{
+			Name:          "Remove_User_Role_Success",
+			UserID:        1,
+			RoleID:        1,
+			ExpectedError: nil,
+		},
+		{
+			Name:          "Remove_User_Role_Failed_Role_Doest_Exist",
+			UserID:        1,
+			RoleID:        3,
+			ExpectedError: ErrRoleDoesntExist,
+		},
+	}
+
+	ctx := context.Background()
+
+	for i := range testCases {
+		tc := testCases[i]
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Parallel()
+			repo.Mock.Test(t)
+
+			err := s.RemoveUserRole(ctx, tc.UserID, tc.RoleID)
+
+			if err != tc.ExpectedError {
+				t.Errorf("expected error %v, got %v", tc.ExpectedError, err)
+			}
+		})
+	}
 }
